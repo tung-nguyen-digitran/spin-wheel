@@ -2,53 +2,51 @@ import {Wheel} from '../../../dist/spin-wheel-esm.js';
 import * as easing from '../../../scripts/easing.js';
 
 window.onload = () => {
-
   const container = document.querySelector('.wheel-wrapper');
   const dropdownWinningItem = document.querySelector('select.winning-item');
-  const dropdownEasingFunction = document.querySelector('select.easing-function');
+  const dropdownEasingFunction = document.querySelector(
+    'select.easing-function'
+  );
   const dropdownRevolutions = document.querySelector('select.revolutions');
 
   const btnSpin = document.querySelector('.gui-wrapper .btn-spin');
   const btnStop = document.querySelector('.gui-wrapper .btn-stop');
 
   const props = {
-    debug: true, // So we can see pointer angle.
+    debug: false, // So we can see pointer angle.
     items: [
       {
-        label: 'Dog',
-        weight: 6,
-      },
-      {
-        label: 'Cat',
-        weight: 4.9,
-      },
-      {
-        label: 'Fish',
-        weight: 4.1,
-      },
-      {
-        label: 'Rabbit',
-        weight: 3.7,
-      },
-      {
-        label: 'Bird',
-        weight: 3,
-      },
-      {
-        label: 'Chicken',
-        weight: 2.8,
-      },
-      {
-        label: 'Lizard',
-        weight: 2.5,
-      },
-      {
-        label: 'Turtle',
+        label: '20k',
         weight: 1,
+        trueWeight: 20,
+        price: 20,
+      },
+      {
+        label: '50k',
+        weight: 1,
+        trueWeight: 4,
+        price: 50,
+      },
+      {
+        label: '100k',
+        weight: 1,
+        trueWeight: 2,
+        price: 100,
+      },
+      {
+        label: '200k',
+        weight: 1,
+        trueWeight: 1,
+        price: 200,
       },
     ],
     itemLabelRadiusMax: 0.5,
   };
+
+  let sum_of_weight = 0;
+  props.items.forEach(element => {
+    sum_of_weight += element.trueWeight;
+  });
 
   const easingFunctions = [
     {
@@ -96,36 +94,65 @@ window.onload = () => {
   }
 
   window.addEventListener('click', (e) => {
-
     // Listen for click event on spin button:
     if (e.target === btnSpin) {
       const winningItemIndex = fetchWinningItemIndexFromApi();
+
+      let one = 0;
+      let two = 0;
+      let three = 0;
+      let four = 0;
+      for (let index = 0; index < 1000; index++) {
+        const result = fetchWinningItemIndexFromApi() + 1;
+        if (1 === result) one++;
+        if (2 === result) two++;
+        if (3 === result) three++;
+        if (4 === result) four++;
+      }
+      console.log(one, two, three, four);
+
+
       const easing = easingFunctions[dropdownEasingFunction.value];
       const easingFunction = easing.function;
       const duration = 2600;
-      const spinDirection = parseInt(document.querySelector('input[name="spinDirection"]:checked').value);
+      const spinDirection = parseInt(
+        document.querySelector('input[name="spinDirection"]:checked').value
+      );
       const revolutions = parseInt(dropdownRevolutions.value);
-      wheel.spinToItem(winningItemIndex, duration, true, revolutions, spinDirection, easingFunction);
+      wheel.spinToItem(
+        winningItemIndex,
+        duration,
+        true,
+        revolutions,
+        spinDirection,
+        easingFunction
+      );
     }
 
     // Listen for click event on stop button:
     if (e.target === btnStop) {
       wheel.stop();
     }
-
   });
 
   window.addEventListener('keyup', (e) => {
-
     if (e.target && e.target.matches('#pointerAngle')) {
       wheel.pointerAngle = parseInt(e.target.value) || 0;
     }
-
   });
 
   function fetchWinningItemIndexFromApi() {
-    // Simulate a call to the back-end
-    return dropdownWinningItem.value;
-  }
+    let rand = Math.floor(Math.random() * sum_of_weight);
+    let result = 0; // Initialize a variable to hold the result
+    for (let index = 0; index < props.items.length; index++) {
+      const element = props.items[index];
+      if (rand < element.trueWeight) {
+        result = index; // Assign the price to result
+        break; // Exit the loop once we find the matching element
+      }
+      rand -= element.trueWeight; // Decrease rand by the trueWeight
+    }
 
+    return result; // Return the result after the loop
+  }
 };
